@@ -123,6 +123,11 @@ function CameraImageReady() {
     outCtx.imageSmoothingEnabled = false;
 
     outCtx.drawImage(gbcCanvas, 0, 0, 1024, 1380);
+
+    
+    var link = document.getElementById('dl_link');
+    link.download = 'gbc_output.png';
+    link.setAttribute('href', output_canvas.toDataURL("image/png"));
 }
 
 /**
@@ -165,7 +170,6 @@ input.addEventListener('change', () => {
         return;
 
     let file = input.files[0];
-
     CONFIG.imageURL = URL.createObjectURL(file);
     render();
 });
