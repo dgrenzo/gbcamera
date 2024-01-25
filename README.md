@@ -11,3 +11,6 @@ bmp
 128px * 112px 
 
 4 colors (0xFFFFFF, 0xC0C0C0, 0x808080, 0x000000)
+
+
+some example input images are in src/camera
