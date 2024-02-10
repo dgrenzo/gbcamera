@@ -1,17 +1,36 @@
+/**
+ * @typedef {Object} Dimensions
+ * @property {number} width
+ * @property {number} height
+ */
+
+/** @typedef {[number, number, number, number]} PaletteColor */
+/** @typedef {[PaletteColor, PaletteColor, PaletteColor, PaletteColor]} Palette */
+
+/**
+ * @typedef {Object} GBCOptions
+ * @property {Palette} palette
+ * @property {Dimensions} dimensions
+ */
+
 const imageScale = 1;
 
+/** @type {Dimensions} */
 const canvasSize = {
-    w : 128,
-    h : 172
+    width : 128,
+    height : 172
 }
 
+/** @type {Dimensions} */
 const sourceSize = {
-    w : 128,
-    h : 112
+    width : 128,
+    height : 112
 }
+
+/** @type {Dimensions} */
 const imageSize = {
-    w : sourceSize.w * imageScale,
-    h : sourceSize.h * imageScale,
+    width : sourceSize.width * imageScale,
+    height : sourceSize.height * imageScale,
 }
 
 const paletteInput = [
@@ -50,6 +69,115 @@ const palettes = [
     ]
 ];
 
+
+/**
+ * @param {number} hex 
+ * @returns {PaletteColor}
+ */
+function ToRGBA(hex) {
+    return [
+        (hex & 0xFF0000) >> 16,
+        (hex & 0x00FF00) >> 8,
+        (hex & 0x0000FF),
+        255
+    ];
+}
+
+/**
+ * @class
+ * @param {GBCOptions} options 
+ */
+function GBCImage(options) {
+
+    //Setup the html content
+    const div = this.div = document.createElement('div');
+    div.style.float = "left";
+    const canvas = document.createElement('canvas');
+    div.appendChild(canvas);
+    div.appendChild(document.createElement('br'));
+    let dlRect;
+    div.appendChild(dlRect = document.createElement('a'));
+    dlRect.href = "";
+    dlRect.style.color = "#FFFFFF";
+    dlRect.text = "rect";
+    dlRect.setAttribute('download', 'gbc_out_rect.png');
+
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createElement('br'));
+
+    let dlSquare;
+    div.appendChild(dlSquare = document.createElement('a'));
+    dlSquare.href = "";
+    dlSquare.style.color = "#FFFFFF";
+    dlSquare.text = "square";
+    dlSquare.setAttribute('download', 'gbc_out_square.png');
+
+
+    const outputRect = document.createElement('canvas');
+    outputRect.width = 1024;
+    outputRect.height = 1380;
+    const ctxRect = outputRect.getContext('2d');
+    ctxRect.imageSmoothingEnabled = false;
+
+    const outputSquare = document.createElement('canvas');
+    outputSquare.width = 1140;
+    outputSquare.height = 1140;
+    const ctxSquare = outputSquare.getContext('2d');
+    ctxSquare.imageSmoothingEnabled = false;
+
+    /** @type {Palette} */
+    const palette = [
+        ToRGBA(options.palette[0]),
+        ToRGBA(options.palette[1]),
+        ToRGBA(options.palette[2]),
+        ToRGBA(options.palette[3])
+    ];
+
+    
+    const width = canvas.width = options.dimensions.width;
+    const height = canvas.height = options.dimensions.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const newData = ctx.createImageData(width, height);
+
+    /**
+     * @param {ImageData} imageData 
+     */
+    this.PalletizeImage = (imageData) => {
+        let pixel;
+        let paletteIndex;
+
+        for (let index = 0; index < width * height * 4; index += 4) {
+            pixel = imageData.data[index];
+
+            paletteIndex = 0;
+            if (pixel >= 255) {
+                paletteIndex = 3;
+            } else if (pixel >= 192) {
+                paletteIndex = 2;
+            } else if (pixel >= 128) {
+                paletteIndex = 1;
+            }
+            newData.data[index] = palette[paletteIndex][0];
+            newData.data[index + 1] = palette[paletteIndex][1];
+            newData.data[index + 2] = palette[paletteIndex][2];
+            newData.data[index + 3] = palette[paletteIndex][3];
+        }
+
+        ctx.putImageData(newData, 0, 0);
+
+        ctxRect.drawImage(canvas, 0, 0, 1024, 1380);
+        dlRect.setAttribute('href', outputRect.toDataURL("image/png"));
+
+        ctxSquare.drawImage(canvas, 0,0, 1, 1, 0, 0, 1140, 1140);
+        ctxSquare.drawImage(canvas, 8, (canvasSize.height - imageSize.height) / 2, 114, 112, 0, 10, 1140, 1120)
+        dlSquare.setAttribute('href', outputSquare.toDataURL("image/png"));
+        
+    }
+}
+
 const CONFIG = {
     palette : palettes[0],
     templateURL : "./templates/default.png",
@@ -63,87 +191,55 @@ const gbcCanvas = document.getElementById('gbc_canvas');
 /** @type {HTMLDivElement} */
 const container = document.getElementById('container');
 
+/** @type {HTMLDivElement} */
+const output_container = document.getElementById('output_container');
+
 /** @type {CanvasRenderingContext2D} */
 const ctx = gbcCanvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
+/** @type {GBCImage[]} */
+const gbcImages = [];
+for (let i = 0; i < palettes.length; i ++) {
+    gbcImages.push(new GBCImage({
+        palette : palettes[i],
+        dimensions: {
+            width : canvasSize.width,
+            height : canvasSize.height
+        }
+    }));
+    output_container.appendChild(gbcImages[i].div);
+}
+
 function render() {
-    ctx.fillRect(0,0, canvasSize.w, canvasSize.h);
-    DrawImage(CONFIG.templateURL, 0, 0, canvasSize.w, canvasSize.h, () => {
-        DrawImage(CONFIG.imageURL, 0, (canvasSize.h - imageSize.h) / 2, imageSize.w, imageSize.h, CameraImageReady);
+    ctx.fillRect(0,0, canvasSize.width, canvasSize.height);
+    DrawImage(CONFIG.templateURL, 0, 0, canvasSize.width, canvasSize.height, () => {
+        DrawImage(CONFIG.imageURL, 0, (canvasSize.height - imageSize.height) / 2, imageSize.width, imageSize.height, CameraImageReady);
     });
 }
 
 function CameraImageReady() {
-    function ToRGBA(hex) {
-        return [
-            (hex & 0xFF0000) >> 16,
-            (hex & 0x00FF00) >> 8,
-            (hex & 0x0000FF),
-            255
-        ];
-    }
-
-    var paletteRGBA = [
-        ToRGBA(CONFIG.palette[0]),
-        ToRGBA(CONFIG.palette[1]),
-        ToRGBA(CONFIG.palette[2]),
-        ToRGBA(CONFIG.palette[3])
-    ];
-
-    var imageData = ctx.getImageData(0, 0, canvasSize.w, canvasSize.h).data;
-    const newData = ctx.createImageData(1,1);
-
-    var start = Date.now();
-    for (let y = 0; y < canvasSize.h; y ++) {
-        for (let x = 0; x < canvasSize.w; x ++) {
-            
-            var pixel = imageData[((y * canvasSize.w) + x) * 4];
-
-            var i = 0;
-            if (pixel >= 255) {
-                i = 3;
-            } else if (pixel >= 192) {
-                i = 2;
-            } else if (pixel >= 128) {
-                i = 1;
-            }
-
-            newData.data[0] = paletteRGBA[i][0];
-            newData.data[1] = paletteRGBA[i][1];
-            newData.data[2] = paletteRGBA[i][2];
-            newData.data[3] = paletteRGBA[i][3];
-            ctx.putImageData(newData, x, y);
-        }
-    }
-    console.log("elapsed: " + (Date.now()-start) + "ms");
+    let imageData = ctx.getImageData(0, 0, canvasSize.width, canvasSize.height);
     
-    var output_canvas = document.getElementById('output_canvas');
-    var outCtx = output_canvas.getContext("2d");
-    outCtx.imageSmoothingEnabled = false;
-
-    outCtx.drawImage(gbcCanvas, 0, 0, 1024, 1380);
-
-    
-    var link = document.getElementById('dl_link');
-    link.download = 'gbc_output.png';
-    link.setAttribute('href', output_canvas.toDataURL("image/png"));
+    for (let i = 0; i < gbcImages.length; i ++) {
+        gbcImages[i].PalletizeImage(imageData);
+    }
 }
 
 /**
  * @param {string} src 
  * @param {number} x 
  * @param {number} y 
- * @param {number} w 
- * @param {number} h 
+ * @param {number} width 
+ * @param {number} height 
  * @param {()=>void} callback
  */
-function DrawImage(src, x, y, w, h, callback = () => {}) {
+function DrawImage(src, x, y, width, height, callback = () => {}) {
     var image = new Image();
     image.src = src;
 
     var OnImageLoaded = () => {
-        ctx.drawImage(image, x, y, w, h);
+        ctx.drawImage(image, x, y, width, height);
         callback();
     }
     
@@ -156,12 +252,6 @@ function DrawImage(src, x, y, w, h, callback = () => {}) {
 }
 
 render();
-
-document.getElementById('palette_button').addEventListener('click', () => {
-    paletteIndex = (paletteIndex + 1) % palettes.length;
-    CONFIG.palette = palettes[paletteIndex];
-    render();
-});
 
 let input = document.getElementById('image_input');
 input.addEventListener('change', () => {
