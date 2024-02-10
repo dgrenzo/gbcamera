@@ -66,6 +66,12 @@ const palettes = [
         0xf10c92,
         0x25fbb3,
         0xfff368
+    ],
+    [
+        0x314731,
+        0x628162,
+        0x9AB15E,
+        0xEBEE8B
     ]
 ];
 
