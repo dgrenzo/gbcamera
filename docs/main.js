@@ -126,8 +126,8 @@ function GBCImage(options) {
     ctxRect.imageSmoothingEnabled = false;
 
     const outputSquare = document.createElement('canvas');
-    outputSquare.width = 1140;
-    outputSquare.height = 1140;
+    outputSquare.width = 1380;
+    outputSquare.height = 1220;
     const ctxSquare = outputSquare.getContext('2d');
     ctxSquare.imageSmoothingEnabled = false;
 
@@ -177,8 +177,8 @@ function GBCImage(options) {
         ctxRect.drawImage(canvas, 0, 0, 1024, 1380);
         dlRect.setAttribute('href', outputRect.toDataURL("image/png"));
 
-        ctxSquare.drawImage(canvas, 0,0, 1, 1, 0, 0, 1140, 1140);
-        ctxSquare.drawImage(canvas, 8, (canvasSize.height - imageSize.height) / 2, 114, 112, 0, 10, 1140, 1120)
+        ctxSquare.drawImage(canvas, 0,0, 1, 1, 0, 0, 1380, 1220);
+        ctxSquare.drawImage(canvas, 0, (canvasSize.height - imageSize.height) / 2, 128, 112, 50, 50, 1280, 1120)
         dlSquare.setAttribute('href', outputSquare.toDataURL("image/png"));
         
     }
