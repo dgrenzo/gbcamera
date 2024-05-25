@@ -44,10 +44,10 @@ let paletteIndex = 0;
 
 const palettes = [
     [
-        0x0f380f,
-        0x306230,
-        0x77a112,
-        0x9bbc0f
+        0x454545,
+        0x626367,
+        0x9097ab,
+        0xdbdde8
     ],
     [
         0x4c1759,
