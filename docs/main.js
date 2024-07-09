@@ -56,34 +56,16 @@ const palettes = [
         0xdbdde8
     ],
     [
-        0x4c1759,
-        0x8132cc,
-        0xd330db,
-        0xe89300,
-    ],
-    [
         0x592202,
         0xaf8119,
         0xdcd644,
         0xfffcda
     ],
     [
-        0x0084ff,
-        0xf10c92,
-        0x25fbb3,
-        0xfff368
-    ],
-    [
         0x314731,
         0x628162,
         0x9AB15E,
         0xEBEE8B
-    ],
-    [
-        0x222421,
-        0x505445,
-        0x7e8e67,
-        0xacbe8c
     ],
     [
         0x2b1039,
@@ -96,18 +78,6 @@ const palettes = [
         0x9540a5,
         0xf68c00,
         0xffcc00
-    ],
-    [
-        0x430427,
-        0xe10e82,
-        0xeac3d6,
-        0xf2f4f7
-    ],
-    [
-        0x1c0000,
-        0xa81000,
-        0xf83800,
-        0xfbb800
     ],
     [
         0x181010,
